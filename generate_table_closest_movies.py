@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 import time
 
 number_movies_returned  = 5
-min_movies_rated_by_user = 5
-min_users_rated_movie = 20
+min_movies_rated_by_user = 2
+min_users_rated_movie = 150
 
 
 movies = pd.read_csv('data/movies.dat', sep='::', names=['movie_id', 'movie_title', 'genra'], header=None )
@@ -64,8 +64,9 @@ def get_all_scores(user_by_movie_matrix):
     movies_number = user_by_movie.shape[1]
     scores = np.zeros(shape=(movies_number, movies_number))
     for index1 in range(movies_number):
-        for index2 in range(index1+1, movies_number):
-            scores[index1, index2] = compute_score(index1, index2, user_by_movie_matrix)
+        diffs = np.subtract(user_by_movie_matrix, np.vstack(user_by_movie_matrix[:, index1]))
+        diffs[np.isnan(diffs)] = 0.0
+        scores[index1] = np.linalg.norm(diffs, axis=0)
     return scores
 
 current_time1 = time.time()
@@ -90,9 +91,9 @@ print('Score calculation took: ', time_scores)
 all_closest_movies_df = pd.DataFrame()
 all_closest_movies_df['movie_title'] = movies_used.values
 for i in range(number_movies_returned):
-    all_closest_movies_df['closest_movie_{}'.format(i+1)] = closest_movies[:,i]
+    all_closest_movies_df['closest_movie_{}'.format(i+1)] = closest_movies[:,-1*i]
 
-database_filename = 'movie_recommendations.db'
+database_filename = 'movie_recommendations_v3.db'
 table_name = 'Closest_movies'
 engine = create_engine('sqlite:///' + database_filename)
 all_closest_movies_df.to_sql(table_name, engine, index=False, if_exists='replace')
