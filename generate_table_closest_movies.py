@@ -128,6 +128,14 @@ scores = get_all_scores(user_by_movie_matrix)
 
 current_time2 = time.time()
 
+
+###########################################
+# combine genres and ratings
+scores = np.multiply(scores, genre_similarities)
+
+
+###########################################
+# get the top movies
 negative_n = -1*number_movies_returned
 closest_movies = np.argpartition(scores, negative_n, axis=1)[:, negative_n:]
 
@@ -138,10 +146,6 @@ time_total = current_time3 - current_time1
 print('Total time: ', time_total)
 print('Score calculation took: ', time_scores)
 
-
-###########################################
-# combine genres and ratings
-scores = np.multiply(scores, genre_similarities)
 
 ###########################################
 # save to db
