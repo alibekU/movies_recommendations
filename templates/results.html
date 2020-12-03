@@ -2,13 +2,14 @@
 
 {% block content %}
     {% if similar_movies|length != 0 %}
-        <h3 class="text-center message">If you liked {{requested_movie}}, then you will probably like ...</h1>
+        <br/>
+        <h2 class="text-center message">If you liked "{{requested_movie}}", then you will probably like ...</h1>
         <ul class="list-group">
             {% for movie in similar_movies %}
                 <li class="list-group-item text-center">{{movie}}</li>
             {% endfor %}    
         </ul>
     {% else %}
-        <h3 class="text-center message">Movie "{{requested_movie}}" was not found</h1>
+        <h2 class="text-center message">Movie "{{requested_movie}}" was not found</h1>
     {% endif %}
 {% endblock %}
