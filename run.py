@@ -4,9 +4,11 @@ from wtforms import TextField, Form
 import pandas as pd
 from sqlalchemy import create_engine
 
+number_movies_returned  = 10
+database_filepath = 'movie_recommendations_1600_multip_ratings.db'
+
 app = Flask(__name__)
-number_movies_returned  = 5
-database_filepath = 'movie_recommendations_v5.db'
+
 
 # extract movies data
 
