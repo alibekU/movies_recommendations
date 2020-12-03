@@ -9,7 +9,7 @@ number_movies_returned  = 10
 min_movies_rated_by_user = 2
 min_users_rated_movie = 100
 liked_score_min = 7
-database_filename = 'movie_recommendations.db'
+database_filename = 'movie_recommendations_1600_multipl_genres.db'
 table_name = 'Closest_movies'
 
 
@@ -138,6 +138,10 @@ time_total = current_time3 - current_time1
 print('Total time: ', time_total)
 print('Score calculation took: ', time_scores)
 
+
+###########################################
+# combine genres and ratings
+scores = np.multiply(scores, genre_similarities)
 
 ###########################################
 # save to db

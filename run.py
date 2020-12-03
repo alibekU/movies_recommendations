@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 number_movies_returned  = 10
-database_filepath = 'movie_recommendations_1600_multip_ratings.db'
+database_filepath = 'movie_recommendations_1600_multipl_genres.db'
 
 app = Flask(__name__)
 
