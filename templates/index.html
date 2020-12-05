@@ -23,7 +23,7 @@
     </header>
 
     {% block content %}
-        <div class="container-fluid">
+        <div class="container-fluid container-main">
             <div class="row align-items-center justify-content-center ">
                 <div class = "col-lg-4 mx-auto col-xs-12 col-sm-10">
                     <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
@@ -41,16 +41,16 @@
     {% endblock %}
 
 
-    <footer>
-        <nav class="navbar fixed-bottom navbar-expand-sm">
+    <footer class="footer">
+        <nav class="navbar navbar-expand-md">
               <div>
                     <div class="navbar-nav mr-auto ">
-                            <a class="nav-item nav-link" href="http://github.com/alibekU/movies_recommendations">Check source on GitHub</a>
-                            <a class="nav-item nav-link" href="http://linkedin.com/in/alibek-utyubayev-74402721/">Made by Alibek Utyubayev</a>
+                            <a class="nav-item nav-link" href="http://github.com/alibekU/movies_recommendations">GitHub</a>
+                            <a class="nav-item nav-link" href="http://linkedin.com/in/alibek-utyubayev-74402721/">By Alibek Utyubayev</a>
                 </div>
               </div>
         </nav>
-      </footer>
+    </footer>
 
 
     <script>

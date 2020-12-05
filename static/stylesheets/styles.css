@@ -28,11 +28,21 @@ a.results_element {
 	color: black;
 }
 
-div.container-fluid {
+div.container-main {
 	position: absolute;
 	top: 30%;
 }
 
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+  }
+  
+footer.footer {
+	flex: 0 0 50px;/*or just height:50px;*/
+	margin-top: auto;
+  }
 
 .ui-state-hover,
 .ui-widget-content .ui-state-hover,
