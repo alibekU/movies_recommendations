@@ -3,15 +3,21 @@ import numpy as np
 from sqlalchemy import create_engine
 import time
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
-from scipy.spatial import distance
+from global_parameters import *
 
-number_movies_returned  = 10
-min_movies_rated_by_user = 2
-min_users_rated_movie = 100
-liked_score_min = 7
-database_filename = 'movie_recommendations_1600_multipl_genres.db'
-table_name = 'Closest_movies'
+# assign values from global_parameters.py to local variables
+number_movies_returned  = global_number_movies_returned
+min_movies_rated_by_user = global_min_movies_rated_by_user
+min_users_rated_movie = global_min_users_rated_movie
+global_database_filepath = global_database_filepath
+table_name = global_recs_table_name
 
+def preprocess_movies(movies_df):
+    movies_df.loc[movies_df['movie_title'] == 'Gisaengchung (2019)', 'movie_title'] = 'Parasite (Gisaengchung) (2019)'
+    movies_df.loc[movies_df['movie_title'] == 'Vaiana (2016)', 'movie_title'] = 'Moana (Vaiana) (2016)'
+    pattern_amp = ['&amp;', '&']
+    movies_df.loc[:, 'movie_title'] = movies_df['movie_title'].str.replace('|'.join(pattern_amp), 'and')
+    return movies_df 
 
 movies = pd.read_csv('data/movies.dat', sep='::', names=['movie_id', 'movie_title', 'genra'], header=None, engine='python')
 movies.dropna(inplace=True)
@@ -20,6 +26,8 @@ movies.drop_duplicates(subset=['movie_id'], inplace=True)
 
 movies.index = movies['movie_id']
 movies = movies.drop(columns=['movie_id'])
+
+movies = preprocess_movies(movies)
 
 ratings = pd.read_csv('data/ratings.dat', sep='::', names=['user_id', 'movie_id', 'rating', 'rating_timestamp'], header=None, engine='python')
 ratings_new = ratings.drop(columns=['rating_timestamp'])
@@ -57,53 +65,8 @@ def create_genres_matrix(movie_genres_df, genres):
                 genres_matrix[i,j] = 1
     return genres_matrix
 
-'''
-def get_users(movie_index, user_by_movie_matrix):
-    column = user_by_movie_matrix[:,movie_index]
-    users = np.where(np.isnan(column) == False)[0] 
-    return users
-
-def get_common_users(movie_index1, movie_index2, user_by_movie_matrix):
-    users1 = get_users(movie_index1, user_by_movie_matrix)
-    users2 = get_users(movie_index2, user_by_movie_matrix)
-    common_users = np.intersect1d(users1, users2, assume_unique=True)
-    return common_users
-
-def compute_score(movie_index1, movie_index2, user_by_movie_matrix):
-    common_users = get_common_users(movie_index1, movie_index2, user_by_movie_matrix)
-    movie1_ratings = user_by_movie_matrix[common_users, movie_index1]
-    movie2_ratings = user_by_movie_matrix[common_users, movie_index2]
-
-    score = 1- distance.cosine(movie1_ratings,movie2_ratings)
-
-    return score
 
 def get_all_scores(user_by_movie_matrix):
-    movies_number = user_by_movie_matrix.shape[1]
-
-    user_by_movie_matrix[user_by_movie_matrix < liked_score_min] = 0
-    user_by_movie_matrix[user_by_movie_matrix >= liked_score_min] = 1
-
-    scores = np.zeros(shape=(movies_number, movies_number))
-    for index1 in range(movies_number):
-        for index2 in range(index1+1, movies_number):
-            scores[index1, index2] = compute_score(index1, index2, user_by_movie_matrix)
-    return scores
-'''
-
-def get_all_scores(user_by_movie_matrix):
-    #movies_number = user_by_movie.shape[1]
-    #scores = np.zeros(shape=(movies_number, movies_number))
-    '''
-    for index1 in range(movies_number):
-        diffs = np.subtract(user_by_movie_matrix, np.vstack(user_by_movie_matrix[:, index1]))
-        diffs[np.isnan(diffs)] = 0.0
-        #scores[index1] = np.linalg.norm(diffs, axis=0)
-        #scores[index1] = np.nanmean(np.absolute(diffs), axis=0)
-    #np.fill_diagonal(scores, -1)
-    #scores[scores==0] = 1
-    #scores = 1 / scores
-    '''
     temp_matrix = user_by_movie_matrix.copy()
     temp_matrix[np.isnan(temp_matrix)] = 0.0
     scores = np.dot(temp_matrix.T, temp_matrix)
@@ -112,21 +75,19 @@ def get_all_scores(user_by_movie_matrix):
 
 
 ###########################################
-# genres
-
-genres = create_genra_list(movie_genres_df)
-genres_matrix = create_genres_matrix(movie_genres_df, genres)
-genre_similarities = cosine_similarity(genres_matrix)
-
-
-###########################################
 # ratings
-
 current_time1 = time.time()
 
 scores = get_all_scores(user_by_movie_matrix)
 
 current_time2 = time.time()
+
+
+###########################################
+# genres
+genres = create_genra_list(movie_genres_df)
+genres_matrix = create_genres_matrix(movie_genres_df, genres)
+genre_similarities = cosine_similarity(genres_matrix)
 
 
 ###########################################
@@ -149,13 +110,12 @@ print('Score calculation took: ', time_scores)
 
 ###########################################
 # save to db
-
 all_closest_movies_df = pd.DataFrame()
 all_closest_movies_df['movie_title'] = movies_used.values
 for i in range(number_movies_returned):
     all_closest_movies_df['closest_movie_{}'.format(i+1)] = closest_movies[:,-1*i]
 
-engine = create_engine('sqlite:///' + database_filename)
+engine = create_engine('sqlite:///' + global_database_filepath)
 all_closest_movies_df.to_sql(table_name, engine, index=False, if_exists='replace')
 engine.dispose()
 
