@@ -130,3 +130,4 @@ dmypy.json
 .pyre/
 .vscode/settings.json
 templates/default.css
+generate_table_closest_movies_old.py
