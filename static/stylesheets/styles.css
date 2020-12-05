@@ -28,10 +28,9 @@ a.results_element {
 	color: black;
 }
 
-div.container {
+div.container-fluid {
 	position: absolute;
 	top: 30%;
-	transform: translate(0, -30%);
 }
 
 
