@@ -1,15 +1,31 @@
 {% extends "index.html" %}
 
 {% block content %}
-    {% if similar_movies|length != 0 %}
-        <br/>
-        <h2 class="text-center message">If you liked "{{requested_movie}}", then you will probably like ...</h1>
-        <ul class="list-group">
-            {% for movie in similar_movies %}
-                <li class="list-group-item text-center">{{movie}}</li>
-            {% endfor %}    
-        </ul>
-    {% else %}
-        <h2 class="text-center message">Movie "{{requested_movie}}" was not found</h1>
-    {% endif %}
+    <div class="container-results">
+        <div class="row align-items-center justify-content-center">
+            <div class = "col-lg-4 mx-auto" >
+                <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
+                    <div class="form-group"> 
+                        <input autocomplete="false" name="hidden" type="text" style="display:none;">
+                            {{ form.movie_autocomplete(placeholder="Start typing the movie name you liked...", class="form-control form-rounded") }}
+                        </div>
+                    <div>
+                        <button type="submit" class="btn btn btn-pill btn-dark">Find movies!</button>
+                    </div>
+                </form>
+                <br/>
+                {% if similar_movies|length != 0 %}
+                    <h2 class="text-center message">If you liked "{{requested_movie}}", then you will probably like ...</h1>
+                    <p class="text-center message">Click on the movie name to open a google search</p>
+                    <ul class="list-group">
+                        {% for movie in similar_movies %}
+                            <li class="list-group-item text-center"><a class ="results_element" href="http://www.google.com/search?q={{movie}}" target="_blank" rel="noopener noreferrer">{{movie}}</a></li>
+                        {% endfor %}    
+                    </ul>
+                {% else %}
+                    <h2 class="text-center message">Movie "{{requested_movie}}" was not found</h1>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

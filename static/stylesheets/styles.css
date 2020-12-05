@@ -15,18 +15,27 @@ li.list-group-item {
 	color: white; 
 }
 
-.navbar-brand, .navbar-nav, .nav-item, .nav-link {
+.navbar-brand {
 	color: white;
 	font-weight: bold;
 }
 
-div.container {
+.navbar-nav, .nav-item, .nav-link {
+	color: white;
+}
+
+a.results_element {
+	color: black;
+}
+
+div.container_1 {
 	position: absolute;
 	top: 30%;
 	left: 50%;
-	transform: translate(-50%, -10%);
+	transform: translate(-50%, -30%);
 }
-	
+
+
 .ui-state-hover,
 .ui-widget-content .ui-state-hover,
 .ui-widget-header .ui-state-hover,

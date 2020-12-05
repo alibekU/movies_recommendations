@@ -16,36 +16,36 @@
     <header >
         <nav class="navbar navbar-expand-md">
             <a class="navbar-brand" href="/">
-                <img alt="Find Movies Like" src="{{ url_for('static', filename='images/find_movies.png') }}">
+                Find Movies Like ...
             </a>
         </nav>
     </header>
 
-    <div class="container">
-        <div class="row align-items-center justify-content-center">
-            <div class = "col-lg-4 col-lg-offset-4" >
-                <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
-                    <div class="form-group"> 
-                        <input autocomplete="false" name="hidden" type="text" style="display:none;">
-                        {{ form.movie_autocomplete(placeholder="Start typing the movie name you liked...", class="form-control form-rounded") }}
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn btn-pill btn-dark">Find movies!</button>
-                    </div>
-                </form>
-                {% block content %}
-                {% endblock %}
+    {% block content %}
+        <div class="container align-items-center">
+            <div class="align-items-center row">
+                <div class = "col-lg-4 mx-auto" >
+                    <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
+                        <div class="form-group"> 
+                            <input autocomplete="false" name="hidden" type="text" style="display:none;">
+                                {{ form.movie_autocomplete(placeholder="Start typing name of the movie you liked...", class="form-control form-rounded") }}
+                            </div>
+                        <div>
+                            <button type="submit" class="btn btn btn-pill btn-dark">Find movies!</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
+         </div>
+    {% endblock %}
 
 
     <footer>
         <nav class="navbar fixed-bottom navbar-expand-sm">
               <div>
                     <div class="navbar-nav mr-auto ">
-                            <a class="nav-item nav-link" href="http://github.com/alibekU">GitHub</a>
-                            <a class="nav-item nav-link" href="http://linkedin.com/in/alibek-utyubayev-74402721/">By Alibek Utyubayev</a>
+                            <a class="nav-item nav-link" href="http://github.com/alibekU/movies_recommendations">Check source on GitHub</a>
+                            <a class="nav-item nav-link" href="http://linkedin.com/in/alibek-utyubayev-74402721/">Made by Alibek Utyubayev</a>
                 </div>
               </div>
         </nav>
