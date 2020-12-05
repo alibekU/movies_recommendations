@@ -9,6 +9,7 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Find movies like those you liked</title>
   </head>
 
@@ -24,7 +25,7 @@
     {% block content %}
         <div class="container-fluid">
             <div class="row align-items-center justify-content-center ">
-                <div class = "col-lg-4 mx-auto col-xs-12 col-sm-12">
+                <div class = "col-lg-4 mx-auto col-xs-12 col-sm-10">
                     <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
                         <div class="form-group"> 
                             <input autocomplete="false" name="hidden" type="text" style="display:none;">
