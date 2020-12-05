@@ -3,15 +3,16 @@ import json
 from wtforms import TextField, Form
 import pandas as pd
 from sqlalchemy import create_engine
+from global_parameters import *
 
-number_movies_returned  = 10
-database_filepath = 'movie_recommendations_1600_multipl_genres.db'
+# assign values from global_parameters.py to local variables
+number_movies_returned  = global_number_movies_returned
+database_filepath = global_database_filepath
 
 app = Flask(__name__)
 
 
 # extract movies data
-
 engine = create_engine('sqlite:///'+ database_filepath)
 movies_data = pd.read_sql_table('Closest_movies', engine)
 
