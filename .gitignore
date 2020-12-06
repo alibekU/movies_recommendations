@@ -131,3 +131,4 @@ dmypy.json
 .vscode/settings.json
 templates/default.css
 generate_table_closest_movies_old.py
+.DS_Store
