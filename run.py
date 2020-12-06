@@ -6,7 +6,9 @@ from sqlalchemy import create_engine
 from global_parameters import *
 
 # assign values from global_parameters.py to local variables
+# number_movies_returned - how many most similar movies output when requested for each movie
 number_movies_returned  = global_number_movies_returned
+# database_filepath - name of the sqlalchemy database file where recommendations are stored
 database_filepath = global_database_filepath
 
 app = Flask(__name__)
