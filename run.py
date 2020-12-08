@@ -20,14 +20,20 @@ movies_data = pd.read_sql_table('Closest_movies', engine)
 
 engine.dispose()
 
+# get the movie titles
 movie_titles = list(movies_data['movie_title'])
 
+# SearchForm class will allow us to have autocomplete feature
 class SearchForm(Form):
     movie_autocomplete = TextField('Movie name', id='movie_autocomplete')
 
 
 @app.route('/autocomplete', methods=['GET', 'POST'])
 def autocomplete():
+    '''
+        autocomplete - function to respond to a request from javascript fuction
+        responsible for autocomplete feature. Sends all the movie titles to the front.
+    '''
     return Response(json.dumps(movie_titles), mimetype='application/json')
 
 
@@ -39,12 +45,15 @@ def index():
 @app.route('/results', methods=['GET', 'POST'])
 def results():
     requested_movie = request.args.get('movie_autocomplete', '')
+    # get the recommendatuins on requested movie
     movie_row = movies_data[movies_data['movie_title'] == requested_movie].reset_index()
     similar_movies = []
     if movie_row.shape[0] != 0:    
         for i in range(number_movies_returned):
             column_name = 'closest_movie_{}'.format(i+1)
+            # get the id of i-th closest movie
             id = movie_row.loc[0,column_name]
+            # use the id to get the name of the closest movie
             movie_i = movies_data.loc[id, 'movie_title']
             similar_movies.append(movie_i)
     form = SearchForm(request.form)

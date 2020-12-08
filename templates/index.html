@@ -26,6 +26,16 @@
         <div class="container-fluid container-main">
             <div class="row align-items-center justify-content-center ">
                 <div class = "col-lg-4 mx-auto col-xs-12 col-sm-10">
+                    <p class="text-center message">
+                        It is a nice cozy evening, why not enjoy some great movie?
+                    </p>
+                    <p class="text-center message">
+                        No sign up, no hassle. Just get a recommendation based on a movie you liked.
+                    </p>
+                </div>
+            </div>
+            <div class="row align-items-center justify-content-center ">
+                <div class = "col-lg-4 mx-auto col-xs-12 col-sm-10">
                     <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
                         <div class="form-group"> 
                             <input autocomplete="false" name="hidden" type="text" style="display:none;">
@@ -52,7 +62,7 @@
         </nav>
     </footer>
 
-
+<!-- Javascript to have autocomplete feature--> 
     <script>
         $(function() {
             $.ajax({
@@ -60,7 +70,7 @@
                 }).done(function (data){
                     $('#movie_autocomplete').autocomplete({
                         source: function(request, response) {
-                            var maxResults = 5
+                            var maxResults = 7
                             var results = $.ui.autocomplete.filter(data, request.term);
                             response(results.slice(0, maxResults));
                         },

@@ -79,10 +79,13 @@ To rebuild a movie recommendations list: <br/>
 # Discussion of the results
 To decide how movies are similar to each other I did the following:
 1. Calculated user ratings similarity score between all pairs of movies by using the linear kernel function (https://scikit-learn.org/stable/modules/metrics.html#linear-kernel, and it is basically cosine similarity without norming) on each column of user-movie ratings matrix built from the ratings data
-2. Calculated movie genres similarity score between all pairs of movies by using cosine distance between each movie's genres
-3. Applied movie genres similarity scores as weights to the user ratings similarity score  (multiplied each user ratings similarity score by corresponding genre score suing numpy.multiply, which is different from matrix multiplication)
+2. Calculated how many common reviewers are between each pair of movies, and used this information to:
+- - Avoid comparing movies that have less than 5 common reviewers to avoid coincedental high score
+- - Divide the each score from step 1 by corresponding number of common reviewers to have an average product of scores rather than the sum of products. This allows to avoid popular movies with many reviews being identified as most similar just because they have a large score in step 1.
+3. Calculated movie genres similarity score between all pairs of movies by using cosine distance between each movie's genres and applied these scores as weights to the user ratings similarity score  (multiplied each user ratings similarity score from step 2 by corresponding genre score using numpy.multiply(), which is different from matrix multiplication)
+4. For each movie then selected N (defined in global_parameters.py) movies with highest resulting scores.
 <br/>
-The results were not measured at this point as I didn't come with a proper way for it. The problem is that there is no single correct way to compute similarity of the movies, and computing similarity in one way, and then testing it with some other formula does not make sense. What does it mean for two movies to be similar? It means that people will find these two movies alike, and if they liked one movie, the are likely to like the other and the opposite goes for the case they disliked one of the movies. The best way to measure quality of such a tool is to conduct a user study and ask people to rate the recommendations. At this point this metric on a small set of users (basically my friends) look alright.  
+The results were not measured at this point as I didn't come with a proper way for it. The problem is that there is no single correct way to compute similarity of the movies, and computing similarity in one way, and then testing it with some other formula does not make sense. What does it mean for two movies to be similar? It means that people will find these two movies alike, and if they enjoyed one movie, they are likely to enjoy the other, and the opposite goes for the case they disliked one of the movies. The best way to measure quality of such a tool is to conduct a user study and ask people to rate the recommendations. At this point this metric on a small set of users (basically my friends) look alright.
 
 # Author 
 Alibek Utyubayev. 

@@ -18,8 +18,6 @@ number_movies_returned  = global_number_movies_returned
 min_movies_rated_by_user = global_min_movies_rated_by_user
 # min_users_rated_movie - how many users at least should rate a movie to keep the movie for later processing
 min_users_rated_movie = global_min_users_rated_movie
-# min_common_raters - minimum number of common reviewers between two movies to be considered as similar
-min_common_raters = global_min_common_raters
 # global_database_filepath - name of the sqlalchemy database file where recommendations will be stored 
 global_database_filepath = global_database_filepath
 # table_name - name of the table with recommendations in the above database 
@@ -116,29 +114,6 @@ def create_genres_matrix(movie_genres_df, genres):
     return genres_matrix
 
 
-def get_common_raters(user_by_movie_matrix):
-    '''
-        get_common_raters - function to calculate number of common raters (users who rated both movies) between each pair of movies based on user ratings 
-        using linear kernel to speed up the process (like cosine similarity but without norming - sum of multilications of corresponding coordinates).
-
-        Input:
-        - user_by_movie_matrix - numpy matrix with movie ratings where each row represents a user and each column a movie
-        Output:
-        - common_raters - numpy matrix of raters where each row and column represent a movie, so score[i,j] stores number of users who scored both movies number i and number j.
-    '''
-    # create a copy of matrix since we will be modifying it
-    temp_matrix = user_by_movie_matrix.copy()
-    # fill all non nans with ones to compute number of common elements when multiplying vectors
-    temp_matrix[~np.isnan(temp_matrix)] = 1
-    # fill nans with zeroes to have correct matrix multiplication
-    temp_matrix[np.isnan(temp_matrix)] = 0
-    # compute linear kernel (like cosine similarity but without norming) - measure of similarity between movies
-    # the first term is transposed as user_by_movie_matrix has movies as columns, but we need first term to row-oriented
-    common_raters = np.dot(temp_matrix.T, temp_matrix)
-    # replace zeroes and movies that have too few common reviewers with -1 to avoid dividing by zero and give the movies with few common raters a low score
-    common_raters[common_raters<min_common_raters] = -1
-    return common_raters
-
 def get_all_scores(user_by_movie_matrix):
     '''
         get_all_scores - function to calculate similarity score between each pair of movies based on user ratings 
@@ -159,11 +134,27 @@ def get_all_scores(user_by_movie_matrix):
     # fill nans with zeroes to have correct matrix multiplication
     temp_matrix[np.isnan(temp_matrix)] = 0.0
     # compute linear kernel (like cosine similarity but without norming) - measure of similarity between movies
-    # the first term is transposed as user_by_movie_matrix has movies as columns, but we need first term to row-oriented
     scores = np.dot(temp_matrix.T, temp_matrix)
-    # set diagonals with 0 so that movies is not declared to be most similar to itself in the web app
-    np.fill_diagonal(scores, 0)
+
+    #cosine_scores = cosine_similarity(temp_matrix.T)
+    #scores = np.multiply(scores, cosine_scores)
+    # set diagonals with -1 so that movies is not declared to be most similar to itself in the web app
+    np.fill_diagonal(scores, -1)
     return scores
+
+def get_number_common_users(user_by_movie_matrix):
+    movies_number = user_by_movie_matrix.shape[1]
+    number_common_users = np.ones(shape=(movies_number, movies_number))
+    for index1 in range(movies_number):
+        movie_vector1 = user_by_movie_matrix[:, index1]
+        indexes_1 = np.where(~np.isnan(movie_vector1))
+        for index2 in range(index1+1, movies_number):
+            movie_vector2 = user_by_movie_matrix[:, index2]
+            indexes_2 = np.where(~np.isnan(movie_vector2))
+            common_indexes = np.intersect1d(indexes_1, indexes_2)
+            number_common_users[index1, index2] = len(common_indexes)
+    number_common_users[number_common_users == 0] = -1
+    return number_common_users
 
 def main():
     ###########################################
@@ -177,12 +168,8 @@ def main():
 
     # time the performance
     current_time1 = time.time()
-    # get similarity scores
+    # get scores
     scores = get_all_scores(user_by_movie_matrix)
-    # get number of common raters
-    common_raters = get_common_raters(user_by_movie_matrix)
-    # divide score by the number of common raters to get a more fair score
-    scores = np.multiply(scores, (1/common_raters) )
     current_time2 = time.time()
 
 
@@ -194,6 +181,13 @@ def main():
     # use cosine similarity as the number of coordinates is constant and they are 0 and 1, 
     # not integer numbers with quantity meaning something
     genre_similarities = cosine_similarity(genres_matrix)
+
+    ###########################################
+    # combine ratings and number of common users
+
+    # multiply position by position, not as matrices to apply genre scores as weights
+    number_common_users = get_number_common_users(user_by_movie_matrix)
+    scores = np.multiply(scores, 1/number_common_users)
 
 
     ###########################################
