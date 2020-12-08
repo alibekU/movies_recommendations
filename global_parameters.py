@@ -4,7 +4,7 @@
 '''
 
 # how many most similar movies to store for each movie and output when requested
-global_number_movies_returned  = 10
+global_number_movies_returned  = 12
 # name of the sqlalchemy database file where recommendations will be stored
 global_database_filepath = 'recommendation_database/movie_recs_6000_kernel_min5_common_genres_15.db'
 # name of the table with recommendations in the above database
