@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript" src="//code.jquery.com/jquery-latest.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
     <meta charset="utf-8">
@@ -28,7 +27,7 @@
                 <div class = "col-lg-4 mx-auto col-xs-12 col-sm-10">
                     <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
                         <div class="form-group"> 
-                            <input autocomplete="false" name="hidden" type="text" style="display:none;">
+                            <input autocomplete="false" type="text" style="display:none;">
                                 {{ form.movie_autocomplete(placeholder="Start typing name of the movie you liked...", class="form-control form-rounded") }}
                             </div>
                         <div>

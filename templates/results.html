@@ -6,7 +6,7 @@
             <div class = "col-lg-4 mx-auto col-xs-12 col-sm-10" >
                 <form action='{{ url_for("results") }}' method="GET" autocomplete="off">
                     <div class="form-group"> 
-                        <input autocomplete="false" name="hidden" type="text" style="display:none;">
+                        <input autocomplete="false" type="text" style="display:none;">
                             {{ form.movie_autocomplete(placeholder="Start typing name of the movie you liked...", class="form-control form-rounded") }}
                         </div>
                     <div>
