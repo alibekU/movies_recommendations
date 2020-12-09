@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 import time
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 from global_parameters import *
+from scipy.spatial import distance
 
 # assign values from global_parameters.py to local variables
 # number_movies_returned - how many most similar movies to store for each movie and output when requested
@@ -37,8 +38,9 @@ def process_movie_names(movies_df):
     '''
     movies_df.loc[movies_df == 'Gisaengchung (2019)'] = 'Parasite (Gisaengchung) (2019)'
     movies_df.loc[movies_df == 'Vaiana (2016)'] = 'Moana (Vaiana) (2016)'
-    pattern_amp = ['&amp;', '&']
+    pattern_amp = ['&amp;', '&'] 
     movies_df = movies_df.str.replace('|'.join(pattern_amp), 'and')
+    movies_df = movies_df.str.replace('é', 'e')
     return movies_df 
 
 def process_data(movies_file='data/movies.dat', ratings_file='data/ratings.dat'):
@@ -137,16 +139,16 @@ def get_common_raters(user_by_movie_matrix):
     common_raters = np.dot(temp_matrix.T, temp_matrix)
     # replace zeroes and movies that have too few common reviewers with -1 to avoid dividing by zero and give the movies with few common raters a low score
     common_raters[common_raters<min_common_raters] = -1
+    common_raters[common_raters>=min_common_raters] = 1
     return common_raters
 
-def get_all_scores(user_by_movie_matrix):
+
+def compute_rating_score(user_by_movie_matrix):
     '''
-        get_all_scores - function to calculate similarity score between each pair of movies based on user ratings 
-        using linear kernel (like cosine similarity but without norming - sum of multilications of corresponding coordinates).
-        This works well for several reasons:
-        1. The higher the both scores by a user to a 2 different movies, the more the user liked both movies, and the higher will be the score. 
-        2. The more times similar users watched some 2 movies, the higher will be the score, and so the more likely it is that
-         movies are similar (think about Harry Potter or say scary movie fans).
+        compute_rating_score - function to calculate similarity score between each pair of movies based on user ratings 
+        using average linear kernel (like cosine similarity but without norming - sum of multilications of corresponding coordinates, divided by the number of  corresponding coordinates).
+        This works well for:
+        1. The higher the scores given by a user to a 2 different movies on average, the more the user liked both movies, and the higher will be the score. 
 
         Input:
         - user_by_movie_matrix - numpy matrix with movie ratings where each row represents a user and each column a movie
@@ -154,16 +156,24 @@ def get_all_scores(user_by_movie_matrix):
         - scores - numpy matrix of scores where each row and column represent a movie, so score[i,j] stores similarity score based on ratings
         between movies number i and number j.
     '''
+    # matrix with the number of common reviewers between each pair of movies
+    common_raters= get_common_raters(user_by_movie_matrix)
     # create a copy of matrix since we will be modifying it
     temp_matrix = user_by_movie_matrix.copy()
     # fill nans with zeroes to have correct matrix multiplication
     temp_matrix[np.isnan(temp_matrix)] = 0.0
+
     # compute linear kernel (like cosine similarity but without norming) - measure of similarity between movies
     # the first term is transposed as user_by_movie_matrix has movies as columns, but we need first term to row-oriented
-    scores = np.dot(temp_matrix.T, temp_matrix)
+    scores_kernel = np.dot(temp_matrix.T, temp_matrix)
+    # divide the scores by number of common reviewers to get a more fair average score
+    scores = scores_kernel * (1/common_raters)
+
     # set diagonals with 0 so that movies is not declared to be most similar to itself in the web app
     np.fill_diagonal(scores, 0)
+
     return scores
+
 
 def main():
     ###########################################
@@ -178,11 +188,7 @@ def main():
     # time the performance
     current_time1 = time.time()
     # get similarity scores
-    scores = get_all_scores(user_by_movie_matrix)
-    # get number of common raters
-    common_raters = get_common_raters(user_by_movie_matrix)
-    # divide score by the number of common raters to get a more fair score
-    scores = np.multiply(scores, (1/common_raters) )
+    scores = compute_rating_score(user_by_movie_matrix)
     current_time2 = time.time()
 
 
@@ -199,8 +205,8 @@ def main():
     ###########################################
     # combine genres and ratings
 
-    # multiply position by position, not as matrices to apply genre scores as weights
-    scores = np.multiply(scores, genre_similarities)
+    # multiply position by position, not as matrices to apply genre scores sqrt (to lessen its effect) as weights
+    scores = np.multiply(scores, np.sqrt(genre_similarities))
 
 
     ###########################################
@@ -234,6 +240,7 @@ def main():
     engine = create_engine('sqlite:///' + global_database_filepath)
     all_closest_movies_df.to_sql(table_name, engine, index=False, if_exists='replace')
     engine.dispose()
+
 
 if __name__ == "__main__":
     main()

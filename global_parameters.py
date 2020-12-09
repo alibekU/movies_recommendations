@@ -6,7 +6,7 @@
 # how many most similar movies to store for each movie and output when requested
 global_number_movies_returned  = 12
 # name of the sqlalchemy database file where recommendations will be stored
-global_database_filepath = 'recommendation_database/movie_recs_6000_kernel_min5_common_genres_15.db'
+global_database_filepath = 'recommendation_database/movie_recs_6000_kernel_min5_common_genres_sqrt_12.db'
 # name of the table with recommendations in the above database
 global_recs_table_name = 'Closest_movies'
 # how many movies at least a user should rated to keep the user for later processing
