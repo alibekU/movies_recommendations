@@ -132,3 +132,5 @@ dmypy.json
 templates/default.css
 generate_table_closest_movies_old.py
 .DS_Store
+create_recommendations_percent_similar.py
+create_recommendations_long_true_cosine.py
