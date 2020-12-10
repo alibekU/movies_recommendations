@@ -21,6 +21,8 @@ min_movies_rated_by_user = global_min_movies_rated_by_user
 min_users_rated_movie = global_min_users_rated_movie
 # min_common_raters - minimum number of common reviewers between two movies to be considered as similar
 min_common_raters = global_min_common_raters
+# rating_similarity_weight - how many times rating similarity score is more important (if > 1) or less important (if < 1) than the genres similarity
+rating_similarity_weight =  global_rating_similarity_weight
 # global_database_filepath - name of the sqlalchemy database file where recommendations will be stored 
 global_database_filepath = global_database_filepath
 # table_name - name of the table with recommendations in the above database 
@@ -139,14 +141,13 @@ def get_common_raters(user_by_movie_matrix):
     common_raters = np.dot(temp_matrix.T, temp_matrix)
     # replace zeroes and movies that have too few common reviewers with -1 to avoid dividing by zero and give the movies with few common raters a low score
     common_raters[common_raters<min_common_raters] = -1
-    common_raters[common_raters>=min_common_raters] = 1
     return common_raters
 
 
 def compute_rating_score(user_by_movie_matrix):
     '''
         compute_rating_score - function to calculate similarity score between each pair of movies based on user ratings 
-        using average linear kernel (like cosine similarity but without norming - sum of multilications of corresponding coordinates, divided by the number of  corresponding coordinates).
+        using average linear kernel (like cosine similarity but without norming - sum of multilications of corresponding coordinates, divided by the number of corresponding coordinates).
         This works well for:
         1. The higher the scores given by a user to a 2 different movies on average, the more the user liked both movies, and the higher will be the score. 
 
@@ -166,9 +167,10 @@ def compute_rating_score(user_by_movie_matrix):
     # compute linear kernel (like cosine similarity but without norming) - measure of similarity between movies
     # the first term is transposed as user_by_movie_matrix has movies as columns, but we need first term to row-oriented
     scores_kernel = np.dot(temp_matrix.T, temp_matrix)
-    # divide the scores by number of common reviewers to get a more fair average score
+    # divide the scores by number of common reviewers to get a more fair average score (average of pairwise product of scores for 2 movies)
     scores = scores_kernel * (1/common_raters)
-
+    # divide the scores by 100 to scale it from 0 to 1 as the max possible value is 10*10
+    scores = scores/100
     # set diagonals with 0 so that movies is not declared to be most similar to itself in the web app
     np.fill_diagonal(scores, 0)
 
@@ -200,14 +202,15 @@ def main():
     # use cosine similarity as the number of coordinates is constant and they are 0 and 1, 
     # not integer numbers with quantity meaning something
     genre_similarities = cosine_similarity(genres_matrix)
+    # set diagonals with 0 so that movies is not declared to be most similar to itself in the web app
+    np.fill_diagonal(genre_similarities, 0)
 
 
     ###########################################
     # combine genres and ratings
 
-    # multiply position by position, not as matrices to apply genre scores sqrt (to lessen its effect) as weights
-    scores = np.multiply(scores, np.sqrt(genre_similarities))
-
+    # combine rating scores and genre scores with weights to get final results
+    scores = rating_similarity_weight*(scores) + genre_similarities
 
     ###########################################
     # get the top movies
